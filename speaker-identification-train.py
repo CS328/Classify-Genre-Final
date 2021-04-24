@@ -26,7 +26,7 @@ if not os.path.exists(output_dir):
 
 # the filenames should be in the form 'speaker-data-subject-1.csv', e.g. 'speaker-data-Erik-1.csv'.
 
-class_names = ["Zach" , "Davie" , "Alfred", "NoSpeaker"] # the set of classes, i.e. speakers
+class_names = ["edm" , "classical" , "metal"] # the set of classes, i.e. speakers
 
 data = np.zeros((0,8002)) #8002 = 1 (timestamp) + 8000 (for 8kHz audio data) + 1 (label)
 
