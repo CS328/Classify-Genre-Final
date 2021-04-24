@@ -26,7 +26,7 @@ if not os.path.exists(output_dir):
 
 # the filenames should be in the form 'speaker-data-subject-1.csv', e.g. 'speaker-data-Erik-1.csv'.
 
-class_names = [] # the set of classes, i.e. speakers
+class_names = ["Zach" , "Davie" , "Alfred", "NoSpeaker"] # the set of classes, i.e. speakers
 
 data = np.zeros((0,8002)) #8002 = 1 (timestamp) + 8000 (for 8kHz audio data) + 1 (label)
 
@@ -54,7 +54,7 @@ print("Found data for {} speakers : {}".format(len(class_names), ", ".join(class
 # -----------------------------------------------------------------------------
 
 # Update this depending on how you compute your features
-n_features = 2 
+n_features = 977 
 
 print("Extracting features and labels for {} audio windows...".format(data.shape[0]))
 sys.stdout.flush()
@@ -64,15 +64,26 @@ y = np.zeros(0,)
 
 # change debug to True to show print statements we've included:
 feature_extractor = FeatureExtractor(debug=False) 
+nr_total_windows = 0
+nr_bad_windows = 0
+nr_windows_with_zeros = 0
 
 for i,window_with_timestamp_and_label in enumerate(data):
-	window = window_with_timestamp_and_label[1:-1]
-	label = data[i,-1]
-	x = feature_extractor.extract_features(window)
-	if (len(x) != X.shape[1]):
-		print("Received feature vector of length {}. Expected feature vector of length {}.".format(len(x), X.shape[1]))
-	X = np.append(X, np.reshape(x, (1,-1)), axis=0)
-	y = np.append(y, label)
+    window = window_with_timestamp_and_label[1:-1]
+    label = data[i,-1]
+    nr_total_windows += 1
+    try:
+        x = feature_extractor.extract_features(window)
+        if (len(x) != X.shape[1]):
+            print("Received feature vector of length {}. Expected feature vector of length {}.".format(len(x), X.shape[1]))
+        X = np.append(X, np.reshape(x, (1,-1)), axis=0)
+        y = np.append(y, label)
+    except:
+        nr_bad_windows += 1
+        if np.all((window == 0)):
+            nr_windows_with_zeros += 1
+print("{} windows found".format(nr_total_windows))
+print("{} bad windows found, with {} windows with only zeros".format(nr_bad_windows, nr_windows_with_zeros))
     
 print("Finished feature extraction over {} windows".format(len(X)))
 print("Unique labels found: {}".format(set(y)))
@@ -169,3 +180,99 @@ classifier_filename='classifier.pickle'
 print("Saving best classifier to {}...".format(os.path.join(output_dir, classifier_filename)))
 with open(os.path.join(output_dir, classifier_filename), 'wb') as f: # 'wb' stands for 'write bytes'
 	pickle.dump(best_classifier, f)
+# %%---------------------------------------------------------------------------
+#
+#		                 Load Data From Disk
+#
+# -----------------------------------------------------------------------------
+
+data_dir = 'test-data' # directory where the data files are stored
+
+output_dir = 'testing_output' # directory where the classifier(s) are stored
+
+if not os.path.exists(output_dir):
+	os.mkdir(output_dir)
+
+# the filenames should be in the form 'speaker-data-subject-1.csv', e.g. 'speaker-data-Erik-1.csv'.
+
+class_names = ["Zach" , "Davie" , "AlfredJ", "NoSpeaker"] # the set of classes, i.e. speakers
+
+data = np.zeros((0,8002)) #8002 = 1 (timestamp) + 8000 (for 8kHz audio data) + 1 (label)
+
+for filename in os.listdir(data_dir):
+	if filename.endswith(".csv") and filename.startswith("speaker-data"):
+		filename_components = filename.split("-") # split by the '-' character
+		speaker = filename_components[2]
+		print("Loading data for {}.".format(speaker))
+		if speaker not in class_names:
+			class_names.append(speaker)
+		speaker_label = class_names.index(speaker)
+		sys.stdout.flush()
+		data_file = os.path.join(data_dir, filename)
+		data_for_current_speaker = np.genfromtxt(data_file, delimiter=',')
+		print("Loaded {} raw labelled audio data samples.".format(len(data_for_current_speaker)))
+		sys.stdout.flush()
+		data = np.append(data, data_for_current_speaker, axis=0)
+
+print("Found data for {} speakers : {}".format(len(class_names), ", ".join(class_names)))
+# %%---------------------------------------------------------------------------
+#
+#		                Extract Features & Labels
+#
+# -----------------------------------------------------------------------------
+# Update this depending on how you compute your features
+n_features = 977 
+
+print("Extracting features and labels for {} audio windows...".format(data.shape[0]))
+sys.stdout.flush()
+
+X = np.zeros((0,n_features))
+y = np.zeros(0,)
+
+nr_total_windows = 0
+nr_bad_windows = 0
+nr_windows_with_zeros = 0
+
+for i,window_with_timestamp_and_label in enumerate(data):
+    window = window_with_timestamp_and_label[1:-1]
+    label = data[i,-1]
+    nr_total_windows += 1
+    try:
+        x = feature_extractor.extract_features(window)
+        if (len(x) != X.shape[1]):
+            print("Received feature vector of length {}. Expected feature vector of length {}.".format(len(x), X.shape[1]))
+        X = np.append(X, np.reshape(x, (1,-1)), axis=0)
+        y = np.append(y, label)
+    except:
+        nr_bad_windows += 1
+        if np.all((window == 0)):
+            nr_windows_with_zeros += 1
+
+print("{} windows found".format(nr_total_windows))
+print("{} bad windows found, with {} windows with only zeros".format(nr_bad_windows, nr_windows_with_zeros))
+
+print("Finished feature extraction over {} windows".format(len(X)))
+print("Unique labels found: {}".format(set(y)))
+sys.stdout.flush()
+# %%---------------------------------------------------------------------------
+#
+#		                  Predict on new data
+#
+# -----------------------------------------------------------------------------
+total_accuracy = 0.0
+total_precision = [0.0, 0.0, 0.0, 0.0]
+total_recall = [0.0, 0.0, 0.0, 0.0]
+
+y_pred = best_classifier.predict(X)
+
+# show the comparison between the predicted and ground-truth labels
+conf = confusion_matrix(y, y_pred, labels=[0,1,2,3])
+
+accuracy = np.sum(np.diag(conf)) / float(np.sum(conf))
+precision = np.nan_to_num(np.diag(conf) / np.sum(conf, axis=1).astype(float))
+recall = np.nan_to_num(np.diag(conf) / np.sum(conf, axis=0).astype(float))
+
+print("The accuracy is {}".format(accuracy))  
+print("The precision is {}".format(precision))    
+print("The recall is {}".format(recall)) 
+# %%
