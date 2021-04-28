@@ -90,8 +90,9 @@ class FeatureExtractor():
         You should compute the distribution of the frequencies in fixed bins.
         This will give you a feature vector of length len(bins).
         """
-        return [1] # returns dummy value; replace this with the features you extract
-
+        freqs, bandwiths = self._compute_formants(window)
+        ans = np.histogram(freqs, bins = 15, range = (0, 5500))  
+        return ans[0]
     
     def _compute_mfcc(self, window):
         """
@@ -129,8 +130,20 @@ class FeatureExtractor():
         See section "Deltas and Delta-Deltas" at http://practicalcryptography.com/miscellaneous/machine-learning/guide-mel-frequency-cepstral-coefficients-mfccs/.
         
         """
-        return [1] # returns dummy value; replace this with the features you extract
+        denominator = 10
+        mfccfeature = self._compute_mfcc(window)
+        solution = []
+        for i in range(2, 76):
+            vectord = np.zeros(13)
+            for j in range(1,3):
+                vectord += j*(mfccfeature[i+j,:] - mfccfeature[i-j,:])
+            vectord /= denominator
+            solution.append(vectord)
+        solution = np.array(solution)
+        solution = solution.flatten()
+        return solution
         
+    
     def extract_features(self, window, debug=True):
         """
         Here is where you will extract your features from the data in 
