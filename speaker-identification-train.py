@@ -8,6 +8,10 @@ from sklearn.ensemble import RandomForestClassifier
 from features import FeatureExtractor
 from sklearn.model_selection import KFold
 from sklearn.metrics import confusion_matrix
+from sklearn.naive_bayes import GaussianNB
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
+from sklearn.svm import SVC
 import pickle
 
 
@@ -17,7 +21,7 @@ import pickle
 #
 # -----------------------------------------------------------------------------
 
-data_dir = 'data' # directory where the data files are stored
+data_dir = 'dummy data/train' # directory where the data files are stored
 
 output_dir = 'training_output' # directory where the classifier(s) are stored
 
@@ -26,7 +30,7 @@ if not os.path.exists(output_dir):
 
 # the filenames should be in the form 'speaker-data-subject-1.csv', e.g. 'speaker-data-Erik-1.csv'.
 
-class_names = ["EDM" , "Classical" , "Metal"] # the set of classes, i.e. speakers
+class_names = [] # the set of classes, i.e. speakers
 
 data = np.zeros((0,8002)) #8002 = 1 (timestamp) + 8000 (for 8kHz audio data) + 1 (label)
 
@@ -54,7 +58,7 @@ print("Found data for {} speakers : {}".format(len(class_names), ", ".join(class
 # -----------------------------------------------------------------------------
 
 # Update this depending on how you compute your features
-n_features = 977 
+n_features = 985 
 
 print("Extracting features and labels for {} audio windows...".format(data.shape[0]))
 sys.stdout.flush()
@@ -172,6 +176,73 @@ print("The average recall is {}".format(total_recall/10.0))
 
 # TODO: (optional) train other classifiers and print the average metrics using 10-fold cross-validation
 
+print("\n")
+print("---------------------- Naive Bayes Classifier -------------------------")
+total_accuracy = 0.0
+total_precision = [0.0, 0.0, 0.0]
+total_recall = [0.0, 0.0, 0.0]
+
+for i, (train_index, test_index) in enumerate(cv.split(X)):
+	X_train, X_test = X[train_index], X[test_index]
+	y_train, y_test = y[train_index], y[test_index]
+	print("Fold {} : Training Naive Bayes classifier over {} points...".format(i, len(y_train)))
+	sys.stdout.flush()
+	nb = GaussianNB()
+	nb.fit(X_train, y_train)
+
+	print("Evaluating classifier over {} points...".format(len(y_test)))
+	# predict the labels on the test data
+	y_pred = nb.predict(X_test)
+
+	# show the comparison between the predicted and ground-truth labels
+	conf = confusion_matrix(y_test, y_pred, labels=[0,1,2])
+
+	accuracy = np.sum(np.diag(conf)) / float(np.sum(conf))
+	precision = np.nan_to_num(np.diag(conf) / np.sum(conf, axis=1).astype(float))
+	recall = np.nan_to_num(np.diag(conf) / np.sum(conf, axis=0).astype(float))
+
+	total_accuracy += accuracy
+	total_precision += precision
+	total_recall += recall
+   
+print("The average accuracy is {}".format(total_accuracy/10.0))  
+print("The average precision is {}".format(total_precision/10.0))    
+print("The average recall is {}".format(total_recall/10.0))  
+
+print("\n")
+print("---------------------- SVM Classifier -------------------------")
+total_accuracy = 0.0
+total_precision = [0.0, 0.0, 0.0]
+total_recall = [0.0, 0.0, 0.0]
+
+for i, (train_index, test_index) in enumerate(cv.split(X)):
+	X_train, X_test = X[train_index], X[test_index]
+	y_train, y_test = y[train_index], y[test_index]
+	print("Fold {} : Training SVM classifier over {} points...".format(i, len(y_train)))
+	sys.stdout.flush()
+	clf = make_pipeline(StandardScaler(), SVC(gamma='auto'))
+	clf.fit(X_train, y_train)
+
+	print("Evaluating classifier over {} points...".format(len(y_test)))
+	# predict the labels on the test data
+	y_pred = clf.predict(X_test)
+
+	# show the comparison between the predicted and ground-truth labels
+	conf = confusion_matrix(y_test, y_pred, labels=[0,1,2])
+
+	accuracy = np.sum(np.diag(conf)) / float(np.sum(conf))
+	precision = np.nan_to_num(np.diag(conf) / np.sum(conf, axis=1).astype(float))
+	recall = np.nan_to_num(np.diag(conf) / np.sum(conf, axis=0).astype(float))
+
+	total_accuracy += accuracy
+	total_precision += precision
+	total_recall += recall
+   
+print("The average accuracy is {}".format(total_accuracy/10.0))  
+print("The average precision is {}".format(total_precision/10.0))    
+print("The average recall is {}".format(total_recall/10.0))  
+
+
 # Set this to the best model you found, trained on all the data:
 best_classifier = RandomForestClassifier(n_estimators=100)
 best_classifier.fit(X,y) 
@@ -221,7 +292,7 @@ print("Found data for {} speakers : {}".format(len(class_names), ", ".join(class
 #
 # -----------------------------------------------------------------------------
 # Update this depending on how you compute your features
-n_features = 977 
+n_features = 985 
 
 print("Extracting features and labels for {} audio windows...".format(data.shape[0]))
 sys.stdout.flush()

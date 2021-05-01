@@ -5,6 +5,8 @@ import math
 from scipy.signal import lfilter
 from audiolazy import lpc
 from python_speech_features import mfcc
+from scipy.signal import find_peaks
+from scipy import stats
 
 class FeatureExtractor():
     def __init__(self, debug=True):
@@ -93,6 +95,8 @@ class FeatureExtractor():
         freqs, bandwiths = self._compute_formants(window)
         ans = np.histogram(freqs, bins = 15, range = (0, 5500))  
         return ans[0]
+
+    
     
     def _compute_mfcc(self, window):
         """
@@ -142,6 +146,60 @@ class FeatureExtractor():
         solution = np.array(solution)
         solution = solution.flatten()
         return solution
+    
+    def _compute_mean_features(self, window):
+        """
+        Computes the mean x, y and z acceleration over the given window. 
+        """
+        return np.mean(window, axis=0)
+
+    # TODO: define functions to compute more features
+
+    def _compute_median_features(self, window):
+        """
+        Computes median x, y and z acceleration over the given window.
+        """
+        return np.median(window, axis=0)
+
+
+    def _compute_variance_feature(self, window):
+        return np.var(window, axis=0)
+
+
+    def _compute_fft_features(self, window):
+        """
+        Compute FFT x, y and z over the given window.
+        """
+        fft = np.mean(np.fft.rfft(window, axis=0).astype(float))
+        return np.array([fft])
+
+    def _compute_entropy_features(self, window):
+        """
+        Computes the entropy of x,y, and z acceleration over the given window.
+        """
+        hist, bin_edges = np.histogram(window, density=True)
+        hist = hist/(hist.sum())
+        entropy = stats.entropy(hist)
+        return np.array([entropy])
+
+    def _compute_peak_features(self, window):
+        """
+        Computes the entropy of x,y, and z acceleration over the given window.
+        """
+        
+        peaks1, _ = find_peaks(window)
+
+        # return np.array([len(peaks)])
+
+        return np.array([len(peaks1)])
+                
+    def _compute_max_features(self, window):
+
+        return np.max(window, axis=0)
+
+    def _compute_min_features(self, window):
+
+        return np.min(window, axis=0)
         
     
     def extract_features(self, window, debug=True):
@@ -157,5 +215,14 @@ class FeatureExtractor():
         
         x = np.append(x, self._compute_formant_features(window))
         x = np.append(x, self._compute_delta_coefficients(window))
+        x = np.append(x, self._compute_mean_features(window))
+        x = np.append(x, self._compute_median_features(window))
+        x = np.append(x, self._compute_variance_feature(window))
+        x = np.append(x, self._compute_fft_features(window))
+        x = np.append(x, self._compute_entropy_features(window))
+        x = np.append(x, self._compute_peak_features(window))
+        x = np.append(x, self._compute_max_features(window))
+        x = np.append(x, self._compute_min_features(window))
+        
         
         return x    
