@@ -21,6 +21,7 @@ import pickle
 #
 # -----------------------------------------------------------------------------
 
+#data_dir = 'data/train' # directory where the data files are stored
 data_dir = 'dummy data/train' # directory where the data files are stored
 
 output_dir = 'training_output' # directory where the classifier(s) are stored
@@ -30,6 +31,7 @@ if not os.path.exists(output_dir):
 
 # the filenames should be in the form 'speaker-data-subject-1.csv', e.g. 'speaker-data-Erik-1.csv'.
 
+#class_names = ["EDM", "Classical", "Metal"] # the set of classes, i.e. speakers
 class_names = [] # the set of classes, i.e. speakers
 
 data = np.zeros((0,8002)) #8002 = 1 (timestamp) + 8000 (for 8kHz audio data) + 1 (label)
@@ -257,7 +259,7 @@ with open(os.path.join(output_dir, classifier_filename), 'wb') as f: # 'wb' stan
 #
 # -----------------------------------------------------------------------------
 
-data_dir = 'test-data' # directory where the data files are stored
+data_dir = 'dummy data/test' # directory where the data files are stored
 
 output_dir = 'testing_output' # directory where the classifier(s) are stored
 
@@ -266,7 +268,7 @@ if not os.path.exists(output_dir):
 
 # the filenames should be in the form 'speaker-data-subject-1.csv', e.g. 'speaker-data-Erik-1.csv'.
 
-class_names = ["Zach" , "Davie" , "AlfredJ", "NoSpeaker"] # the set of classes, i.e. speakers
+class_names = [] # the set of classes, i.e. speakers
 
 data = np.zeros((0,8002)) #8002 = 1 (timestamp) + 8000 (for 8kHz audio data) + 1 (label)
 
@@ -331,13 +333,13 @@ sys.stdout.flush()
 #
 # -----------------------------------------------------------------------------
 total_accuracy = 0.0
-total_precision = [0.0, 0.0, 0.0, 0.0]
-total_recall = [0.0, 0.0, 0.0, 0.0]
+total_precision = [0.0, 0.0, 0.0]
+total_recall = [0.0, 0.0, 0.0]
 
 y_pred = best_classifier.predict(X)
 
 # show the comparison between the predicted and ground-truth labels
-conf = confusion_matrix(y, y_pred, labels=[0,1,2,3])
+conf = confusion_matrix(y, y_pred, labels=[0,1,2])
 
 accuracy = np.sum(np.diag(conf)) / float(np.sum(conf))
 precision = np.nan_to_num(np.diag(conf) / np.sum(conf, axis=1).astype(float))
