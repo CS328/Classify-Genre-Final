@@ -31,7 +31,6 @@ if not os.path.exists(output_dir):
 
 # the filenames should be in the form 'speaker-data-subject-1.csv', e.g. 'speaker-data-Erik-1.csv'.
 
-#class_names = ["EDM", "Classical", "Metal"] # the set of classes, i.e. speakers
 class_names = [] # the set of classes, i.e. speakers
 
 data = np.zeros((0,8002)) #8002 = 1 (timestamp) + 8000 (for 8kHz audio data) + 1 (label)
@@ -259,7 +258,7 @@ with open(os.path.join(output_dir, classifier_filename), 'wb') as f: # 'wb' stan
 #
 # -----------------------------------------------------------------------------
 
-data_dir = 'dummy data/test' # directory where the data files are stored
+data_dir = 'test' # directory where the data files are stored
 
 output_dir = 'testing_output' # directory where the classifier(s) are stored
 
@@ -268,7 +267,7 @@ if not os.path.exists(output_dir):
 
 # the filenames should be in the form 'speaker-data-subject-1.csv', e.g. 'speaker-data-Erik-1.csv'.
 
-class_names = [] # the set of classes, i.e. speakers
+class_names = []
 
 data = np.zeros((0,8002)) #8002 = 1 (timestamp) + 8000 (for 8kHz audio data) + 1 (label)
 
