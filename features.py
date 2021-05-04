@@ -93,7 +93,7 @@ class FeatureExtractor():
         This will give you a feature vector of length len(bins).
         """
         freqs, bandwiths = self._compute_formants(window)
-        ans = np.histogram(freqs, bins = 15, range = (0, 5500))  
+        ans = np.histogram(freqs, bins = 60, range = (0, 5500))  
         return ans[0]
 
     
