@@ -22,7 +22,7 @@ import pickle
 # -----------------------------------------------------------------------------
 
 #data_dir = 'data/train' # directory where the data files are stored
-data_dir = 'dummy data/train' # directory where the data files are stored
+data_dir = 'data' # directory where the data files are stored
 
 output_dir = 'training_output' # directory where the classifier(s) are stored
 
