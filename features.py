@@ -7,7 +7,6 @@ from audiolazy import lpc
 from python_speech_features import mfcc
 from scipy.signal import find_peaks
 from scipy import stats
-import librosa
 
 class FeatureExtractor():
     def __init__(self, debug=True):
@@ -202,11 +201,6 @@ class FeatureExtractor():
     def _compute_min_features(self, window):
 
         return np.min(window, axis=0)
-
-    
-    def _spectral_centroid(self, w):
-        cent = librosa.feature.spectral_centroid(window=w, n_fft=8000)
-        return np.mean(cent.T, axis=0)
 
     
     def extract_features(self, window, debug=True):

@@ -128,6 +128,7 @@ for i, (train_index, test_index) in enumerate(cv.split(X)):
 
 	# show the comparison between the predicted and ground-truth labels
 	conf = confusion_matrix(y_test, y_pred, labels=[0,1,2])
+	print(conf)
 
 	accuracy = np.sum(np.diag(conf)) / float(np.sum(conf))
 	precision = np.nan_to_num(np.diag(conf) / np.sum(conf, axis=1).astype(float))
@@ -164,6 +165,7 @@ for i, (train_index, test_index) in enumerate(cv.split(X)):
 
 	# show the comparison between the predicted and ground-truth labels
 	conf = confusion_matrix(y_test, y_pred, labels=[0,1,2])
+	print(conf)
 
 	accuracy = np.sum(np.diag(conf)) / float(np.sum(conf))
 	precision = np.nan_to_num(np.diag(conf) / np.sum(conf, axis=1).astype(float))
@@ -199,6 +201,7 @@ for i, (train_index, test_index) in enumerate(cv.split(X)):
 
 	# show the comparison between the predicted and ground-truth labels
 	conf = confusion_matrix(y_test, y_pred, labels=[0,1,2])
+	print(conf)
 
 	accuracy = np.sum(np.diag(conf)) / float(np.sum(conf))
 	precision = np.nan_to_num(np.diag(conf) / np.sum(conf, axis=1).astype(float))
@@ -232,6 +235,7 @@ for i, (train_index, test_index) in enumerate(cv.split(X)):
 
 	# show the comparison between the predicted and ground-truth labels
 	conf = confusion_matrix(y_test, y_pred, labels=[0,1,2])
+	print(conf)
 
 	accuracy = np.sum(np.diag(conf)) / float(np.sum(conf))
 	precision = np.nan_to_num(np.diag(conf) / np.sum(conf, axis=1).astype(float))
@@ -341,6 +345,7 @@ y_pred = best_classifier.predict(X)
 
 # show the comparison between the predicted and ground-truth labels
 conf = confusion_matrix(y, y_pred, labels=[0,1,2])
+print(conf)
 
 accuracy = np.sum(np.diag(conf)) / float(np.sum(conf))
 precision = np.nan_to_num(np.diag(conf) / np.sum(conf, axis=1).astype(float))
