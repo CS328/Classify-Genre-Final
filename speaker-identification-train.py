@@ -22,7 +22,7 @@ import pickle
 # -----------------------------------------------------------------------------
 
 #data_dir = 'data/train' # directory where the data files are stored
-data_dir = 'data' # directory where the data files are stored
+data_dir = 'dummy data/train' # directory where the data files are stored
 
 output_dir = 'training_output' # directory where the classifier(s) are stored
 
@@ -31,6 +31,7 @@ if not os.path.exists(output_dir):
 
 # the filenames should be in the form 'speaker-data-subject-1.csv', e.g. 'speaker-data-Erik-1.csv'.
 
+#class_names = ["EDM", "Classical", "Metal"] # the set of classes, i.e. speakers
 class_names = [] # the set of classes, i.e. speakers
 
 data = np.zeros((0,8002)) #8002 = 1 (timestamp) + 8000 (for 8kHz audio data) + 1 (label)
@@ -59,7 +60,7 @@ print("Found data for {} speakers : {}".format(len(class_names), ", ".join(class
 # -----------------------------------------------------------------------------
 
 # Update this depending on how you compute your features
-n_features = 985 
+n_features = 1050
 
 print("Extracting features and labels for {} audio windows...".format(data.shape[0]))
 sys.stdout.flush()
@@ -74,19 +75,20 @@ nr_bad_windows = 0
 nr_windows_with_zeros = 0
 
 for i,window_with_timestamp_and_label in enumerate(data):
-    window = window_with_timestamp_and_label[1:-1]
-    label = data[i,-1]
-    nr_total_windows += 1
-    try:
-        x = feature_extractor.extract_features(window)
-        if (len(x) != X.shape[1]):
-            print("Received feature vector of length {}. Expected feature vector of length {}.".format(len(x), X.shape[1]))
-        X = np.append(X, np.reshape(x, (1,-1)), axis=0)
-        y = np.append(y, label)
-    except:
-        nr_bad_windows += 1
-        if np.all((window == 0)):
-            nr_windows_with_zeros += 1
+	window = window_with_timestamp_and_label[1:-1]
+	label = data[i,-1]
+	nr_total_windows += 1
+	try:
+		x = feature_extractor.extract_features(window)
+		if (len(x) != X.shape[1]):
+			print("Received feature vector of length {}. Expected feature vector of length {}.".format(len(x), X.shape[1]))
+		X = np.append(X, np.reshape(x, (1,-1)), axis=0)
+		y = np.append(y, label)
+	except:
+		nr_bad_windows += 1
+		if np.all((window == 0)):
+			nr_windows_with_zeros += 1
+
 print("{} windows found".format(nr_total_windows))
 print("{} bad windows found, with {} windows with only zeros".format(nr_bad_windows, nr_windows_with_zeros))
     
@@ -258,7 +260,7 @@ with open(os.path.join(output_dir, classifier_filename), 'wb') as f: # 'wb' stan
 #
 # -----------------------------------------------------------------------------
 
-data_dir = 'test' # directory where the data files are stored
+data_dir = 'dummy data/test' # directory where the data files are stored
 
 output_dir = 'testing_output' # directory where the classifier(s) are stored
 
@@ -267,7 +269,7 @@ if not os.path.exists(output_dir):
 
 # the filenames should be in the form 'speaker-data-subject-1.csv', e.g. 'speaker-data-Erik-1.csv'.
 
-class_names = []
+class_names = [] # the set of classes, i.e. speakers
 
 data = np.zeros((0,8002)) #8002 = 1 (timestamp) + 8000 (for 8kHz audio data) + 1 (label)
 
@@ -293,7 +295,7 @@ print("Found data for {} speakers : {}".format(len(class_names), ", ".join(class
 #
 # -----------------------------------------------------------------------------
 # Update this depending on how you compute your features
-n_features = 985 
+n_features = 1050
 
 print("Extracting features and labels for {} audio windows...".format(data.shape[0]))
 sys.stdout.flush()

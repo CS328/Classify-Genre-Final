@@ -7,6 +7,7 @@ from audiolazy import lpc
 from python_speech_features import mfcc
 from scipy.signal import find_peaks
 from scipy import stats
+import librosa
 
 class FeatureExtractor():
     def __init__(self, debug=True):
@@ -93,7 +94,7 @@ class FeatureExtractor():
         This will give you a feature vector of length len(bins).
         """
         freqs, bandwiths = self._compute_formants(window)
-        ans = np.histogram(freqs, bins = 60, range = (0, 5500))  
+        ans = np.histogram(freqs, bins = 15, range = (0, 5500))  
         return ans[0]
 
     
@@ -134,22 +135,23 @@ class FeatureExtractor():
         See section "Deltas and Delta-Deltas" at http://practicalcryptography.com/miscellaneous/machine-learning/guide-mel-frequency-cepstral-coefficients-mfccs/.
         
         """
-        denominator = 10
-        mfccfeature = self._compute_mfcc(window)
-        solution = []
-        for i in range(2, 76):
-            vectord = np.zeros(13)
-            for j in range(1,3):
-                vectord += j*(mfccfeature[i+j,:] - mfccfeature[i-j,:])
-            vectord /= denominator
-            solution.append(vectord)
-        solution = np.array(solution)
-        solution = solution.flatten()
-        return solution
-    
+        mfcc_feats = self._compute_mfcc(window)
+
+        n_frames = len(mfcc_feats)
+
+        x = np.sum([i**2 for i in range(1, n+1)])
+        denom = np.sum([x, x])
+        delta_feat = np.empty_like(mfcc_feats)
+        padded = np.pad(mfcc_feats, ((n, n), (0, 0)), mode='edge')
+        for t in range(n_frames):
+            delta_feat[t] = np.dot(np.arange(-n, n+1), padded[t : t+2*n+1]) / denom
+        
+        return delta_feat.flatten()
+
+
     def _compute_mean_features(self, window):
         """
-        Computes the mean over the given window. 
+        Computes the mean x, y and z acceleration over the given window. 
         """
         return np.mean(window, axis=0)
 
@@ -157,7 +159,7 @@ class FeatureExtractor():
 
     def _compute_median_features(self, window):
         """
-        Computes median over the given window.
+        Computes median x, y and z acceleration over the given window.
         """
         return np.median(window, axis=0)
 
@@ -168,14 +170,14 @@ class FeatureExtractor():
 
     def _compute_fft_features(self, window):
         """
-        Compute FFT over the given window.
+        Compute FFT x, y and z over the given window.
         """
         fft = np.mean(np.fft.rfft(window, axis=0).astype(float))
         return np.array([fft])
 
     def _compute_entropy_features(self, window):
         """
-        Computes the entropy over the given window.
+        Computes the entropy of x,y, and z acceleration over the given window.
         """
         hist, bin_edges = np.histogram(window, density=True)
         hist = hist/(hist.sum())
@@ -184,7 +186,7 @@ class FeatureExtractor():
 
     def _compute_peak_features(self, window):
         """
-        Computes the peaks over the given window.
+        Computes the entropy of x,y, and z acceleration over the given window.
         """
         
         peaks1, _ = find_peaks(window)
@@ -200,7 +202,12 @@ class FeatureExtractor():
     def _compute_min_features(self, window):
 
         return np.min(window, axis=0)
-        
+
+    
+    def _spectral_centroid(self, w):
+        cent = librosa.feature.spectral_centroid(window=w, n_fft=8000)
+        return np.mean(cent.T, axis=0)
+
     
     def extract_features(self, window, debug=True):
         """
