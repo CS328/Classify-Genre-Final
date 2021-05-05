@@ -22,7 +22,7 @@ import pickle
 # -----------------------------------------------------------------------------
 
 #data_dir = 'data/train' # directory where the data files are stored
-data_dir = 'dummy data/train' # directory where the data files are stored
+data_dir = 'data' # directory where the data files are stored
 
 output_dir = 'training_output' # directory where the classifier(s) are stored
 
@@ -60,7 +60,7 @@ print("Found data for {} speakers : {}".format(len(class_names), ", ".join(class
 # -----------------------------------------------------------------------------
 
 # Update this depending on how you compute your features
-n_features = 1050
+n_features = 1095
 
 print("Extracting features and labels for {} audio windows...".format(data.shape[0]))
 sys.stdout.flush()
@@ -128,7 +128,6 @@ for i, (train_index, test_index) in enumerate(cv.split(X)):
 
 	# show the comparison between the predicted and ground-truth labels
 	conf = confusion_matrix(y_test, y_pred, labels=[0,1,2])
-	print(conf)
 
 	accuracy = np.sum(np.diag(conf)) / float(np.sum(conf))
 	precision = np.nan_to_num(np.diag(conf) / np.sum(conf, axis=1).astype(float))
@@ -165,7 +164,6 @@ for i, (train_index, test_index) in enumerate(cv.split(X)):
 
 	# show the comparison between the predicted and ground-truth labels
 	conf = confusion_matrix(y_test, y_pred, labels=[0,1,2])
-	print(conf)
 
 	accuracy = np.sum(np.diag(conf)) / float(np.sum(conf))
 	precision = np.nan_to_num(np.diag(conf) / np.sum(conf, axis=1).astype(float))
@@ -201,7 +199,6 @@ for i, (train_index, test_index) in enumerate(cv.split(X)):
 
 	# show the comparison between the predicted and ground-truth labels
 	conf = confusion_matrix(y_test, y_pred, labels=[0,1,2])
-	print(conf)
 
 	accuracy = np.sum(np.diag(conf)) / float(np.sum(conf))
 	precision = np.nan_to_num(np.diag(conf) / np.sum(conf, axis=1).astype(float))
@@ -235,7 +232,6 @@ for i, (train_index, test_index) in enumerate(cv.split(X)):
 
 	# show the comparison between the predicted and ground-truth labels
 	conf = confusion_matrix(y_test, y_pred, labels=[0,1,2])
-	print(conf)
 
 	accuracy = np.sum(np.diag(conf)) / float(np.sum(conf))
 	precision = np.nan_to_num(np.diag(conf) / np.sum(conf, axis=1).astype(float))
@@ -264,7 +260,7 @@ with open(os.path.join(output_dir, classifier_filename), 'wb') as f: # 'wb' stan
 #
 # -----------------------------------------------------------------------------
 
-data_dir = 'dummy data/test' # directory where the data files are stored
+data_dir = 'test' # directory where the data files are stored
 
 output_dir = 'testing_output' # directory where the classifier(s) are stored
 
@@ -299,7 +295,7 @@ print("Found data for {} speakers : {}".format(len(class_names), ", ".join(class
 #
 # -----------------------------------------------------------------------------
 # Update this depending on how you compute your features
-n_features = 1050
+n_features = 1095
 
 print("Extracting features and labels for {} audio windows...".format(data.shape[0]))
 sys.stdout.flush()
