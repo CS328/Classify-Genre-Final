@@ -149,7 +149,7 @@ class FeatureExtractor():
     
     def _compute_mean_features(self, window):
         """
-        Computes the mean x, y and z acceleration over the given window. 
+        Computes the mean over the given window. 
         """
         return np.mean(window, axis=0)
 
@@ -157,7 +157,7 @@ class FeatureExtractor():
 
     def _compute_median_features(self, window):
         """
-        Computes median x, y and z acceleration over the given window.
+        Computes median over the given window.
         """
         return np.median(window, axis=0)
 
@@ -168,14 +168,14 @@ class FeatureExtractor():
 
     def _compute_fft_features(self, window):
         """
-        Compute FFT x, y and z over the given window.
+        Compute FFT over the given window.
         """
         fft = np.mean(np.fft.rfft(window, axis=0).astype(float))
         return np.array([fft])
 
     def _compute_entropy_features(self, window):
         """
-        Computes the entropy of x,y, and z acceleration over the given window.
+        Computes the entropy over the given window.
         """
         hist, bin_edges = np.histogram(window, density=True)
         hist = hist/(hist.sum())
@@ -184,7 +184,7 @@ class FeatureExtractor():
 
     def _compute_peak_features(self, window):
         """
-        Computes the entropy of x,y, and z acceleration over the given window.
+        Computes the peaks over the given window.
         """
         
         peaks1, _ = find_peaks(window)
